@@ -1,5 +1,9 @@
-from __future__ import print_function
+from os import name
 from ortools.linear_solver import pywraplp
+import fpdf
+import sys
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class MaximumFlow:
     def __init__(self, input_file):
@@ -64,14 +68,72 @@ class MaximumFlow:
     
     def solve(self):
         self.solver.Solve()
-        for arc in self.arcs:
-            print(self.arcs[arc].lb(), self.arcs[arc].ub(), self.arcs[arc].solution_value())
+        self.arcs_with_flow = [['Origin Arc', 'Destiny Arc', 'Flow']]
+        for index, arc in enumerate(self.arcs):
+            
+            origin_node = str(self.arcs[arc])[1]
+            destiny_node = str(self.arcs[arc])[2]
+            flow = str(self.arcs[arc].solution_value())
+            
+            if index < len(self.arcs) - 1:
+                self.arcs_with_flow.append([origin_node, destiny_node, flow])
 
-        print(self.arcs[f'x{self.source}{self.sink}'].solution_value())
+        self.opt_solution = self.arcs[f'x{self.source}{self.sink}'].solution_value()
+    
+    def generate_pdf(self):
+        pdf = fpdf.FPDF(format='letter')
+
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', size=22)
+        pdf.set_text_color(15, 7, 28)
+        instance = sys.argv[1][:-1]
+        instance_number = sys.argv[1][-1]
+        
+        pdf.cell(200, 7.5, f'Solution for {instance} {instance_number}', align='C')  
         
         
-maximum_flow = MaximumFlow(input_file='input/instancias/instance1.txt')
+        pdf.set_font("Arial", size=12)
+        
+        th = pdf.font_size
+        pdf.ln(4*th)
+        pdf.ln(0.5)
+        
+        for arc in self.arcs_with_flow:
+            for data in arc:
+                pdf.cell(65, 2*th, str(data), border=1, align='C')
+        
+            pdf.ln(2*th)
+        
+        pdf.set_font("Arial", size=16)
+        pdf.set_text_color(44, 88, 123)
+        pdf.cell(200, 30, f'Optimal Solution - {self.opt_solution}', align='C')  
+
+        self.generate_graph()
+        pdf.image(name='output/flow_graph.png', x=50, y=160, w=128, h=96, link='shorturl.at/cgiGI')
+        pdf.set_font("Arial", 'I', size=10)
+        pdf.set_text_color(15, 7, 28)
+        pdf.cell(-200, 60, f'Resulting graph', align='C')  
+        pdf.output('output/maximum_flow_results.pdf')
+        
+    def generate_graph(self):
+        DG = nx.DiGraph()
+        f = plt.figure()
+        edge_labels = {}
+        
+        for arc in self.arcs_with_flow[1:]:
+            origin_node, destiny_node, flow = int(arc[0]), int(arc[1]), float(arc[2])
+            DG.add_edge(origin_node, destiny_node, label=str(flow))
+            edge_labels[(origin_node, destiny_node)] = flow
+        
+        pos = nx.spring_layout(DG)
+        nx.draw_networkx(DG, pos=pos)
+        nx.draw_networkx_edge_labels(DG, pos=pos, edge_labels=edge_labels)
+        f.savefig('output/flow_graph.png')
+        
+         
+maximum_flow = MaximumFlow(input_file=f'input/instancias/{sys.argv[1]}.txt')
 maximum_flow.read_file()
 maximum_flow.set_constraints()
 maximum_flow.set_objective_function()
 maximum_flow.solve()
+maximum_flow.generate_pdf()
