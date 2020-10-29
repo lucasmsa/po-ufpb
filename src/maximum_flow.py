@@ -92,7 +92,7 @@ class MaximumFlow:
         pdf.cell(200, 7.5, f'Solution for {instance} {instance_number}', align='C')  
         
         
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Arial", size=10)
         
         th = pdf.font_size
         pdf.ln(4*th)
@@ -104,15 +104,16 @@ class MaximumFlow:
         
             pdf.ln(2*th)
         
-        pdf.set_font("Arial", size=16)
+        pdf.set_font("Arial", size=14)
         pdf.set_text_color(44, 88, 123)
         pdf.cell(200, 30, f'Optimal Solution - {self.opt_solution}', align='C')  
 
         self.generate_graph()
-        pdf.image(name='output/flow_graph.png', x=50, y=160, w=128, h=96, link='shorturl.at/cgiGI')
-        pdf.set_font("Arial", 'I', size=10)
+        pdf.set_font("Arial", 'I', size=12)
         pdf.set_text_color(15, 7, 28)
-        pdf.cell(-200, 60, f'Resulting graph', align='C')  
+        pdf.cell(-200, 58, f'Resulting graph on the next page...', align='C')  
+        pdf.add_page()
+        pdf.image(name='output/flow_graph.png', x=10, y=0, w=192, h=144, link='https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=youtu.be')
         pdf.output('output/maximum_flow_results.pdf')
         
     def generate_graph(self):
