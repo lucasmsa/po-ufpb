@@ -5,12 +5,9 @@
 ## Report 📑
 ``report/Problema_de_Fluxo_maximo.pdf``
 
-<br>
-
 ## Project 💻
 ##### Transform Maximum Flow problem to minimum flow cost problem
 ##### Solved it using python ortools linear-programming library
-<br>
 
 ## How to run 🕊
 ##### Clone repo `git clone https://github.com/lucasmsa/po-ufpb.git`
